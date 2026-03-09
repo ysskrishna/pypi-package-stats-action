@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-basic:
+    name: Test basic usage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        id: stats
+        with:
+          package-name: 'requests'
+          output-path: 'output/stats.json'
+
+      - name: Verify scalar outputs are non-empty
+        env:
+          NAME: ${{ steps.stats.outputs.name }}
+          VERSION: ${{ steps.stats.outputs.version }}
+          DL_DAY: ${{ steps.stats.outputs.last-day-downloads }}
+          DL_WEEK: ${{ steps.stats.outputs.last-week-downloads }}
+          DL_MONTH: ${{ steps.stats.outputs.last-month-downloads }}
+        run: |
+          for var in NAME VERSION DL_DAY DL_WEEK DL_MONTH; do
+            value="${!var}"
+            if [ -z "$value" ]; then
+              echo "::error::Output '$var' is empty"
+              exit 1
+            fi
+            echo "$var=$value"
+          done
+
+      - name: Verify output file exists and is valid JSON
+        run: |
+          if [ ! -f output/stats.json ]; then
+            echo "::error::output/stats.json does not exist"
+            exit 1
+          fi
+          python3 -m json.tool output/stats.json > /dev/null
+
+      - name: Verify stats-json output is valid JSON with expected keys
+        env:
+          STATS_JSON: ${{ steps.stats.outputs.stats-json }}
+        run: |
+          echo "$STATS_JSON" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          expected_keys = {'package', 'downloads', 'python_versions', 'operating_systems'}
+          actual_keys = set(data.keys())
+          if not expected_keys.issubset(actual_keys):
+              missing = expected_keys - actual_keys
+              print(f'::error::Missing keys in stats-json: {missing}')
+              sys.exit(1)
+          print('All expected keys present:', sorted(actual_keys))
+          "
+
+  test-custom-output-path:
+    name: Test custom output path
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        with:
+          package-name: 'flask'
+          output-path: 'custom-output.json'
+
+      - name: Verify custom output file exists and is valid JSON
+        run: |
+          if [ ! -f custom-output.json ]; then
+            echo "::error::custom-output.json does not exist"
+            exit 1
+          fi
+          python3 -m json.tool custom-output.json > /dev/null
+          echo "custom-output.json is valid JSON"
+
+  test-invalid-package:
+    name: Test invalid package fails gracefully
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        id: stats
+        continue-on-error: true
+        with:
+          package-name: 'this-package-definitely-does-not-exist-xyz-abc-123'
+
+      - name: Verify action failed
+        env:
+          OUTCOME: ${{ steps.stats.outcome }}
+        run: |
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "::error::Expected action to fail for invalid package, but outcome was '$OUTCOME'"
+            exit 1
+          fi
+          echo "Action correctly failed for invalid package"

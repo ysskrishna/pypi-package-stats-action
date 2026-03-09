@@ -1,0 +1,56 @@
+name: 'PyPI Package Stats'
+description: 'Fetch PyPI package download statistics and metadata'
+author: 'ysskrishna'
+
+branding:
+  icon: 'bar-chart-2'
+  color: 'blue'
+
+inputs:
+  package-name:
+    description: 'PyPI package name to fetch statistics for'
+    required: true
+  output-path:
+    description: 'File path to write the JSON stats output'
+    required: false
+    default: 'stats.json'
+
+outputs:
+  stats-json:
+    description: 'Full JSON string of package statistics'
+    value: ${{ steps.fetch-stats.outputs.stats-json }}
+  name:
+    description: 'Package name'
+    value: ${{ steps.fetch-stats.outputs.name }}
+  version:
+    description: 'Current package version on PyPI'
+    value: ${{ steps.fetch-stats.outputs.version }}
+  last-day-downloads:
+    description: 'Downloads in the last day'
+    value: ${{ steps.fetch-stats.outputs.last-day-downloads }}
+  last-week-downloads:
+    description: 'Downloads in the last week'
+    value: ${{ steps.fetch-stats.outputs.last-week-downloads }}
+  last-month-downloads:
+    description: 'Downloads in the last month'
+    value: ${{ steps.fetch-stats.outputs.last-month-downloads }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install pypi-package-stats
+      shell: bash
+      run: pip install "pypi-package-stats>=1.5.0,<2"
+
+    - name: Fetch PyPI package stats
+      id: fetch-stats
+      shell: bash
+      env:
+        INPUT_PACKAGE_NAME: ${{ inputs.package-name }}
+        INPUT_OUTPUT_PATH: ${{ inputs.output-path }}
+      run: python "${{ github.action_path }}/scripts/run.py"
