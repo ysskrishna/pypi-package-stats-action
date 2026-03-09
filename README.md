@@ -155,8 +155,18 @@ Errors are surfaced in the GitHub Actions UI via `::error::` workflow commands.
 
 ## License
 
-[MIT](LICENSE)
+MIT © [Y. Siva Sai Krishna](https://github.com/ysskrishna) - see [LICENSE](LICENSE) for details.
 
 ## Credits
 
 Built on [pypi-package-stats](https://github.com/ysskrishna/pypi-package-stats) — a Python library for fetching PyPI package statistics.
+
+---
+
+<p align="left">
+  <a href="https://github.com/ysskrishna">Author's GitHub</a> •
+  <a href="https://linkedin.com/in/ysskrishna">Author's LinkedIn</a> •
+  <a href="https://github.com/ysskrishna/pypi-package-stats">pypi-package-stats Library</a> •
+  <a href="https://github.com/ysskrishna/pypi-package-stats-action/issues">Report Issues</a> •
+  <a href="https://github.com/ysskrishna/pypi-package-stats-action/releases">Releases</a>
+</p>
