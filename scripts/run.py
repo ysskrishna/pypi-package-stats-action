@@ -61,6 +61,13 @@ def main():
     package_name = get_input("package_name", required=True)
     output_path = get_input("output_path", default="stats.json")
 
+    # Validate output path stays within the workspace
+    workspace = Path(os.environ.get("GITHUB_WORKSPACE", ".")).resolve()
+    resolved_output = (workspace / output_path).resolve()
+    if not resolved_output.is_relative_to(workspace):
+        print(f"::error::output_path '{output_path}' resolves outside the workspace.")
+        sys.exit(1)
+
     # Import library (top-level re-exports — verified in __init__.py)
     try:
         from pypipackagestats import (
@@ -81,10 +88,9 @@ def main():
         stats_json = json.dumps(stats_dict, indent=2)
 
         # Write JSON file
-        out = Path(output_path)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(stats_json, encoding="utf-8")
-        print(f"Stats written to: {out}")
+        resolved_output.parent.mkdir(parents=True, exist_ok=True)
+        resolved_output.write_text(stats_json, encoding="utf-8")
+        print(f"Stats written to: {resolved_output}")
 
         # Set outputs
         pkg = stats_dict.get("package") or {}
