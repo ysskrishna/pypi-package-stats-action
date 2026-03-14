@@ -57,10 +57,37 @@ def main():
         print("::error::Failed to import pypipackagestats. Is the package installed?")
         sys.exit(1)
 
-    # Fetch stats (always no_cache=True since GH Actions has ephemeral filesystem)
+    # Fetch stats, write output, and set summary
     print(f"Fetching stats for package: {package_name}")
     try:
         stats = get_package_stats(package_name, no_cache=True)
+        stats_dict = stats.to_dict()
+        stats_json = json.dumps(stats_dict, indent=2)
+
+        # Write JSON file
+        out = Path(output_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(stats_json, encoding="utf-8")
+        print(f"Stats written to: {out}")
+
+        # Set outputs
+        pkg = stats_dict["package"]
+        downloads = stats_dict["downloads"]
+        set_output("stats-json", stats_json)
+        set_output("name", pkg["name"])
+        set_output("version", pkg["version"])
+        set_output("last-day-downloads", downloads["last_day"])
+        set_output("last-week-downloads", downloads["last_week"])
+        set_output("last-month-downloads", downloads["last_month"])
+
+        # Summary
+        print(SUMMARY_TEMPLATE.format(
+            name=package_name,
+            version=pkg["version"],
+            last_day=downloads["last_day"],
+            last_week=downloads["last_week"],
+            last_month=downloads["last_month"],
+        ))
     except PackageNotFoundError:
         print(f"::error::Package '{package_name}' not found on PyPI.")
         sys.exit(1)
@@ -70,40 +97,15 @@ def main():
     except PyPIStatsError as e:
         print(f"::error::Error fetching stats for '{package_name}': {e}")
         sys.exit(1)
-    except Exception as e:
-        print(f"::error::Unhandled error: {e}")
-        sys.exit(1)
-
-    # Convert to JSON
-    stats_dict = stats.to_dict()
-    stats_json = json.dumps(stats_dict, indent=2)
-
-    # Write JSON file
-    try:
-        out = Path(output_path)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(stats_json, encoding="utf-8")
-        print(f"Stats written to: {out}")
     except OSError as e:
         print(f"::error::Failed to write to '{output_path}': {e}")
         sys.exit(1)
-
-    # Set outputs
-    set_output("stats-json", stats_json)
-    set_output("name", stats_dict["package"]["name"])
-    set_output("version", stats_dict["package"]["version"])
-    set_output("last-day-downloads", stats_dict["downloads"]["last_day"])
-    set_output("last-week-downloads", stats_dict["downloads"]["last_week"])
-    set_output("last-month-downloads", stats_dict["downloads"]["last_month"])
-
-    # Summary
-    print(SUMMARY_TEMPLATE.format(
-        name=package_name,
-        version=stats_dict["package"]["version"],
-        last_day=stats_dict["downloads"]["last_day"],
-        last_week=stats_dict["downloads"]["last_week"],
-        last_month=stats_dict["downloads"]["last_month"],
-    ))
+    except KeyError as e:
+        print(f"::error::Unexpected stats response structure: missing key {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"::error::Unhandled error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
