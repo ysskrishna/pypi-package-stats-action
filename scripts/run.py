@@ -120,6 +120,12 @@ def main():
         if summary_file:
             with open(summary_file, "a", encoding="utf-8") as f:
                 f.write(STEP_SUMMARY_TEMPLATE.format(**summary_vars))
+
+        print(
+            "Tip: To use step outputs (e.g. steps.<id>.outputs.last-month-downloads),"
+            " add 'id' to this step. Stats are also available in the JSON file"
+            f" ({output_path}) and the Job Summary above."
+        )
     except PackageNotFoundError:
         print(f"::error::Package '{package_name}' not found on PyPI.")
         sys.exit(1)

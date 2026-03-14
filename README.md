@@ -17,6 +17,8 @@ A GitHub Action to fetch PyPI package download statistics and metadata. Powered 
 - run: echo "Downloads last month: ${{ steps.stats.outputs.last-month-downloads }}"
 ```
 
+> **Note:** The `id` field (e.g. `id: stats`) is required to reference step outputs. If you only need the JSON file or Job Summary, you can omit it.
+
 ## Inputs
 
 | Input | Description | Required | Default |
@@ -34,6 +36,14 @@ A GitHub Action to fetch PyPI package download statistics and metadata. Powered 
 | `last-day-downloads` | Downloads in the last day |
 | `last-week-downloads` | Downloads in the last week |
 | `last-month-downloads` | Downloads in the last month |
+
+## Accessing Stats
+
+There are three ways to access the fetched statistics:
+
+1. **Step outputs** — Reference outputs like `steps.<id>.outputs.last-month-downloads` in subsequent steps. Requires `id` on the action step.
+2. **JSON file** — Stats are written to the `output-path` file (default: `stats.json`). Useful for artifacts or downstream processing.
+3. **Job Summary** — A Markdown stats table is automatically added to the workflow run's Summary page. No configuration needed.
 
 ## JSON Output Schema
 
