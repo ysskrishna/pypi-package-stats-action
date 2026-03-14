@@ -10,9 +10,25 @@ from pathlib import Path
 SUMMARY_TEMPLATE = """\
 Successfully fetched stats for '{name}'
   Version: {version}
-  Downloads (last day):   {last_day:,}
-  Downloads (last week):  {last_week:,}
-  Downloads (last month): {last_month:,}"""
+  Downloads (last day):   {last_day}
+  Downloads (last week):  {last_week}
+  Downloads (last month): {last_month}"""
+
+STEP_SUMMARY_TEMPLATE = """\
+### 📦 PyPI Stats for `{name}`
+
+| Metric | Value |
+|--------|------:|
+| **Version** | `{version}` |
+| **Downloads (last day)** | {last_day} |
+| **Downloads (last week)** | {last_week} |
+| **Downloads (last month)** | {last_month} |
+"""
+
+
+def fmt_downloads(value):
+    """Format a download count: comma-separated number or 'unknown'."""
+    return f"{value:,}" if isinstance(value, int) else "unknown"
 
 
 def get_input(name, required=False, default=None):
@@ -71,23 +87,33 @@ def main():
         print(f"Stats written to: {out}")
 
         # Set outputs
-        pkg = stats_dict["package"]
-        downloads = stats_dict["downloads"]
+        pkg = stats_dict.get("package") or {}
+        downloads = stats_dict.get("downloads") or {}
+        last_day = fmt_downloads(downloads.get("last_day"))
+        last_week = fmt_downloads(downloads.get("last_week"))
+        last_month = fmt_downloads(downloads.get("last_month"))
         set_output("stats-json", stats_json)
-        set_output("name", pkg["name"])
-        set_output("version", pkg["version"])
-        set_output("last-day-downloads", downloads["last_day"])
-        set_output("last-week-downloads", downloads["last_week"])
-        set_output("last-month-downloads", downloads["last_month"])
+        set_output("name", pkg.get("name", package_name))
+        set_output("version", pkg.get("version", "unknown"))
+        set_output("last-day-downloads", last_day)
+        set_output("last-week-downloads", last_week)
+        set_output("last-month-downloads", last_month)
 
         # Summary
-        print(SUMMARY_TEMPLATE.format(
+        summary_vars = dict(
             name=package_name,
-            version=pkg["version"],
-            last_day=downloads["last_day"],
-            last_week=downloads["last_week"],
-            last_month=downloads["last_month"],
-        ))
+            version=pkg.get("version", "unknown"),
+            last_day=last_day,
+            last_week=last_week,
+            last_month=last_month,
+        )
+        print(SUMMARY_TEMPLATE.format(**summary_vars))
+
+        # GitHub Step Summary (rich markdown card on the workflow run page)
+        summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary_file:
+            with open(summary_file, "a", encoding="utf-8") as f:
+                f.write(STEP_SUMMARY_TEMPLATE.format(**summary_vars))
     except PackageNotFoundError:
         print(f"::error::Package '{package_name}' not found on PyPI.")
         sys.exit(1)
