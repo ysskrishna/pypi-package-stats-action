@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0]
+
+### Added
+
+- GitHub Job Summary — a Markdown stats table is automatically written to the workflow run's Summary page
+- Log tip reminding users to set `id` on the action step and listing alternative ways to access stats (JSON file, Job Summary)
+- Output path validation — `output-path` is now verified to stay within `$GITHUB_WORKSPACE`
+- "Accessing Stats" section in README documenting the 3 ways to retrieve results (step outputs, JSON file, Job Summary)
+- Link to the new [examples repository](https://github.com/ysskrishna/pypi-package-stats-action-examples) in README and footer
+
+### Changed
+
+- Refactored `scripts/run.py` — consolidated stats fetching, file writing, and output setting into a single `try` block with granular exception handling (`PackageNotFoundError`, `APIError`, `OSError`, `KeyError`)
+- Download counts are now formatted with comma separators and fall back to `"unknown"` when missing
+- README usage examples replaced with a table linking to the examples repository to avoid duplication
+
 ## [1.0.0]
 
 ### Added
@@ -26,4 +42,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI workflow with 3 test jobs (basic usage, custom output path, invalid package)
 - Automated GitHub Release creation via `publish.yml` workflow on tag push
 
+[1.1.0]: https://github.com/ysskrishna/pypi-package-stats-action/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/ysskrishna/pypi-package-stats-action/releases/tag/v1.0.0
