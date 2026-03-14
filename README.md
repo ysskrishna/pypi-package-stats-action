@@ -84,7 +84,7 @@ jobs:
       - uses: ysskrishna/pypi-package-stats-action@v1
         id: stats
         with:
-          package-name: 'requests'
+          package-name: 'social-links'
 
       - name: Print stats
         env:
@@ -105,13 +105,13 @@ jobs:
 ```yaml
 - uses: ysskrishna/pypi-package-stats-action@v1
   with:
-    package-name: 'flask'
-    output-path: 'reports/flask-stats.json'
+    package-name: 'nestedutils'
+    output-path: 'reports/nestedutils-stats.json'
 
 - uses: actions/upload-artifact@v4
   with:
     name: package-stats
-    path: reports/flask-stats.json
+    path: reports/nestedutils-stats.json
 ```
 
 ### Check Download Threshold
@@ -120,7 +120,7 @@ jobs:
 - uses: ysskrishna/pypi-package-stats-action@v1
   id: stats
   with:
-    package-name: 'my-package'
+    package-name: 'container-detect'
 
 - name: Check download threshold
   env:
@@ -136,11 +136,11 @@ jobs:
 ```yaml
 - uses: ysskrishna/pypi-package-stats-action@v1
   with:
-    package-name: 'numpy'
-    output-path: 'output/numpy-stats.json'
+    package-name: 'video-extensions'
+    output-path: 'output/video-extensions-stats.json'
 
 - name: Read stats file
-  run: cat output/numpy-stats.json | python3 -m json.tool
+  run: cat output/video-extensions-stats.json | python3 -m json.tool
 ```
 
 ## Error Handling
