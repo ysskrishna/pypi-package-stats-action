@@ -7,6 +7,13 @@ import sys
 import uuid
 from pathlib import Path
 
+SUMMARY_TEMPLATE = """\
+Successfully fetched stats for '{name}'
+  Version: {version}
+  Downloads (last day):   {last_day:,}
+  Downloads (last week):  {last_week:,}
+  Downloads (last month): {last_month:,}"""
+
 
 def get_input(name, required=False, default=None):
     """Read action input from INPUT_* env var."""
@@ -90,11 +97,13 @@ def main():
     set_output("last-month-downloads", stats_dict["downloads"]["last_month"])
 
     # Summary
-    print(f"Successfully fetched stats for '{package_name}'")
-    print(f"  Version: {stats_dict['package']['version']}")
-    print(f"  Downloads (last day):   {stats_dict['downloads']['last_day']:,}")
-    print(f"  Downloads (last week):  {stats_dict['downloads']['last_week']:,}")
-    print(f"  Downloads (last month): {stats_dict['downloads']['last_month']:,}")
+    print(SUMMARY_TEMPLATE.format(
+        name=package_name,
+        version=stats_dict["package"]["version"],
+        last_day=stats_dict["downloads"]["last_day"],
+        last_week=stats_dict["downloads"]["last_week"],
+        last_month=stats_dict["downloads"]["last_month"],
+    ))
 
 
 if __name__ == "__main__":
