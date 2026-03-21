@@ -7,6 +7,29 @@ import sys
 import uuid
 from pathlib import Path
 
+SUMMARY_TEMPLATE = """\
+Successfully fetched stats for '{name}'
+  Version: {version}
+  Downloads (last day):   {last_day}
+  Downloads (last week):  {last_week}
+  Downloads (last month): {last_month}"""
+
+STEP_SUMMARY_TEMPLATE = """\
+### 📦 PyPI Stats for `{name}`
+
+| Metric | Value |
+|--------|------:|
+| **Version** | `{version}` |
+| **Downloads (last day)** | {last_day} |
+| **Downloads (last week)** | {last_week} |
+| **Downloads (last month)** | {last_month} |
+"""
+
+
+def fmt_downloads(value):
+    """Format a download count: comma-separated number or 'unknown'."""
+    return f"{value:,}" if isinstance(value, int) else "unknown"
+
 
 def get_input(name, required=False, default=None):
     """Read action input from INPUT_* env var."""
@@ -38,6 +61,13 @@ def main():
     package_name = get_input("package_name", required=True)
     output_path = get_input("output_path", default="stats.json")
 
+    # Validate output path stays within the workspace
+    workspace = Path(os.environ.get("GITHUB_WORKSPACE", ".")).resolve()
+    resolved_output = (workspace / output_path).resolve()
+    if not resolved_output.is_relative_to(workspace):
+        print(f"::error::output_path '{output_path}' resolves outside the workspace.")
+        sys.exit(1)
+
     # Import library (top-level re-exports — verified in __init__.py)
     try:
         from pypipackagestats import (
@@ -50,10 +80,52 @@ def main():
         print("::error::Failed to import pypipackagestats. Is the package installed?")
         sys.exit(1)
 
-    # Fetch stats (always no_cache=True since GH Actions has ephemeral filesystem)
+    # Fetch stats, write output, and set summary
     print(f"Fetching stats for package: {package_name}")
     try:
         stats = get_package_stats(package_name, no_cache=True)
+        stats_dict = stats.to_dict()
+        stats_json = json.dumps(stats_dict, indent=2)
+
+        # Write JSON file
+        resolved_output.parent.mkdir(parents=True, exist_ok=True)
+        resolved_output.write_text(stats_json, encoding="utf-8")
+        print(f"Stats written to: {resolved_output}")
+
+        # Set outputs
+        pkg = stats_dict.get("package") or {}
+        downloads = stats_dict.get("downloads") or {}
+        last_day = fmt_downloads(downloads.get("last_day"))
+        last_week = fmt_downloads(downloads.get("last_week"))
+        last_month = fmt_downloads(downloads.get("last_month"))
+        set_output("stats-json", stats_json)
+        set_output("name", pkg.get("name", package_name))
+        set_output("version", pkg.get("version", "unknown"))
+        set_output("last-day-downloads", last_day)
+        set_output("last-week-downloads", last_week)
+        set_output("last-month-downloads", last_month)
+
+        # Summary
+        summary_vars = dict(
+            name=package_name,
+            version=pkg.get("version", "unknown"),
+            last_day=last_day,
+            last_week=last_week,
+            last_month=last_month,
+        )
+        print(SUMMARY_TEMPLATE.format(**summary_vars))
+
+        # GitHub Step Summary (rich markdown card on the workflow run page)
+        summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary_file:
+            with open(summary_file, "a", encoding="utf-8") as f:
+                f.write(STEP_SUMMARY_TEMPLATE.format(**summary_vars))
+
+        print(
+            "Tip: To use step outputs (e.g. steps.<id>.outputs.last-month-downloads),"
+            " add 'id' to this step. Stats are also available in the JSON file"
+            f" ({output_path}) and the Job Summary above."
+        )
     except PackageNotFoundError:
         print(f"::error::Package '{package_name}' not found on PyPI.")
         sys.exit(1)
@@ -63,38 +135,15 @@ def main():
     except PyPIStatsError as e:
         print(f"::error::Error fetching stats for '{package_name}': {e}")
         sys.exit(1)
-    except Exception as e:
-        print(f"::error::Unhandled error: {e}")
-        sys.exit(1)
-
-    # Convert to JSON
-    stats_dict = stats.to_dict()
-    stats_json = json.dumps(stats_dict, indent=2)
-
-    # Write JSON file
-    try:
-        out = Path(output_path)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(stats_json, encoding="utf-8")
-        print(f"Stats written to: {out}")
     except OSError as e:
         print(f"::error::Failed to write to '{output_path}': {e}")
         sys.exit(1)
-
-    # Set outputs
-    set_output("stats-json", stats_json)
-    set_output("name", stats_dict["package"]["name"])
-    set_output("version", stats_dict["package"]["version"])
-    set_output("last-day-downloads", stats_dict["downloads"]["last_day"])
-    set_output("last-week-downloads", stats_dict["downloads"]["last_week"])
-    set_output("last-month-downloads", stats_dict["downloads"]["last_month"])
-
-    # Summary
-    print(f"Successfully fetched stats for '{package_name}'")
-    print(f"  Version: {stats_dict['package']['version']}")
-    print(f"  Downloads (last day):   {stats_dict['downloads']['last_day']:,}")
-    print(f"  Downloads (last week):  {stats_dict['downloads']['last_week']:,}")
-    print(f"  Downloads (last month): {stats_dict['downloads']['last_month']:,}")
+    except KeyError as e:
+        print(f"::error::Unexpected stats response structure: missing key {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"::error::Unhandled error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

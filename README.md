@@ -17,6 +17,8 @@ A GitHub Action to fetch PyPI package download statistics and metadata. Powered 
 - run: echo "Downloads last month: ${{ steps.stats.outputs.last-month-downloads }}"
 ```
 
+> **Note:** The `id` field (e.g. `id: stats`) is required to reference step outputs. If you only need the JSON file or Job Summary, you can omit it.
+
 ## Inputs
 
 | Input | Description | Required | Default |
@@ -34,6 +36,14 @@ A GitHub Action to fetch PyPI package download statistics and metadata. Powered 
 | `last-day-downloads` | Downloads in the last day |
 | `last-week-downloads` | Downloads in the last week |
 | `last-month-downloads` | Downloads in the last month |
+
+## Accessing Stats
+
+There are three ways to access the fetched statistics:
+
+1. **Step outputs** — Reference outputs like `steps.<id>.outputs.last-month-downloads` in subsequent steps. Requires `id` on the action step.
+2. **JSON file** — Stats are written to the `output-path` file (default: `stats.json`). Useful for artifacts or downstream processing.
+3. **Job Summary** — A Markdown stats table is automatically added to the workflow run's Summary page. No configuration needed.
 
 ## JSON Output Schema
 
@@ -71,77 +81,14 @@ The `stats-json` output and the file written to `output-path` contain the follow
 
 ## Usage Examples
 
-### Basic — Print Download Stats
+For complete, ready-to-use workflow files, see the [examples repository](https://github.com/ysskrishna/pypi-package-stats-action-examples).
 
-```yaml
-name: Package Stats
-on: workflow_dispatch
-
-jobs:
-  stats:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ysskrishna/pypi-package-stats-action@v1
-        id: stats
-        with:
-          package-name: 'requests'
-
-      - name: Print stats
-        env:
-          PKG_NAME: ${{ steps.stats.outputs.name }}
-          PKG_VERSION: ${{ steps.stats.outputs.version }}
-          DL_DAY: ${{ steps.stats.outputs.last-day-downloads }}
-          DL_WEEK: ${{ steps.stats.outputs.last-week-downloads }}
-          DL_MONTH: ${{ steps.stats.outputs.last-month-downloads }}
-        run: |
-          echo "Package: $PKG_NAME v$PKG_VERSION"
-          echo "Downloads (day):   $DL_DAY"
-          echo "Downloads (week):  $DL_WEEK"
-          echo "Downloads (month): $DL_MONTH"
-```
-
-### Save Stats as Artifact
-
-```yaml
-- uses: ysskrishna/pypi-package-stats-action@v1
-  with:
-    package-name: 'flask'
-    output-path: 'reports/flask-stats.json'
-
-- uses: actions/upload-artifact@v4
-  with:
-    name: package-stats
-    path: reports/flask-stats.json
-```
-
-### Check Download Threshold
-
-```yaml
-- uses: ysskrishna/pypi-package-stats-action@v1
-  id: stats
-  with:
-    package-name: 'my-package'
-
-- name: Check download threshold
-  env:
-    DL_MONTH: ${{ steps.stats.outputs.last-month-downloads }}
-  run: |
-    if [ "$DL_MONTH" -lt 1000 ]; then
-      echo "::warning::Monthly downloads ($DL_MONTH) are below 1000"
-    fi
-```
-
-### Custom Output Path
-
-```yaml
-- uses: ysskrishna/pypi-package-stats-action@v1
-  with:
-    package-name: 'numpy'
-    output-path: 'output/numpy-stats.json'
-
-- name: Read stats file
-  run: cat output/numpy-stats.json | python3 -m json.tool
-```
+| Example | Description |
+|---------|-------------|
+| [Basic — Print Stats](https://github.com/ysskrishna/pypi-package-stats-action-examples/blob/main/.github/workflows/basic-print-stats.yml) | Fetch and print download stats |
+| [Check Download Threshold](https://github.com/ysskrishna/pypi-package-stats-action-examples/blob/main/.github/workflows/check-download-threshold.yml) | Warn if monthly downloads fall below a threshold |
+| [Custom Output Path](https://github.com/ysskrishna/pypi-package-stats-action-examples/blob/main/.github/workflows/custom-output-path.yml) | Write stats JSON to a custom file path |
+| [Save Stats as Artifact](https://github.com/ysskrishna/pypi-package-stats-action-examples/blob/main/.github/workflows/save-stats-artifact.yml) | Save stats as a downloadable GitHub Actions artifact |
 
 ## Error Handling
 
@@ -167,6 +114,7 @@ Built on [pypi-package-stats](https://github.com/ysskrishna/pypi-package-stats) 
   <a href="https://github.com/ysskrishna">Author's GitHub</a> •
   <a href="https://linkedin.com/in/ysskrishna">Author's LinkedIn</a> •
   <a href="https://github.com/ysskrishna/pypi-package-stats">pypi-package-stats Library</a> •
+  <a href="https://github.com/ysskrishna/pypi-package-stats-action-examples">Examples</a> •
   <a href="https://github.com/ysskrishna/pypi-package-stats-action/issues">Report Issues</a> •
   <a href="https://github.com/ysskrishna/pypi-package-stats-action/releases">Releases</a>
 </p>
