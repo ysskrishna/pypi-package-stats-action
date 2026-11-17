@@ -3,6 +3,8 @@
 [![CI](https://github.com/ysskrishna/pypi-package-stats-action/actions/workflows/test.yml/badge.svg)](https://github.com/ysskrishna/pypi-package-stats-action/actions/workflows/test.yml)
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-PyPI%20Package%20Stats-blue?logo=github)](https://github.com/marketplace/actions/pypi-package-stats)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/ysskrishna/pypi-package-stats-action?label=release)](https://github.com/ysskrishna/pypi-package-stats-action/releases)
+[![Author site](https://img.shields.io/badge/author-ysskrishna.space-informational)](https://ysskrishna.space)
 [![Context7](https://img.shields.io/badge/Context7-docs-18181B)](https://context7.com/ysskrishna/pypi-package-stats-action)
 [![Ask DeepWiki](https://img.shields.io/badge/DeepWiki-ask-18181B)](https://deepwiki.com/ysskrishna/pypi-package-stats-action)
 
@@ -51,6 +53,9 @@ There are three ways to access the fetched statistics:
 
 The `stats-json` output and the file written to `output-path` contain the following structure:
 
+<details>
+<summary><b>Full JSON output schema</b></summary>
+
 ```json
 {
   "package": {
@@ -81,6 +86,8 @@ The `stats-json` output and the file written to `output-path` contain the follow
 }
 ```
 
+</details>
+
 ## Usage Examples
 
 For complete, ready-to-use workflow files, see the [examples repository](https://github.com/ysskrishna/pypi-package-stats-action-examples).
@@ -102,21 +109,44 @@ The action fails with a clear error message when:
 
 Errors are surfaced in the GitHub Actions UI via `::error::` workflow commands.
 
-## License
-
-MIT © [Y. Siva Sai Krishna](https://github.com/ysskrishna) - see [LICENSE](LICENSE) for details.
-
 ## Credits
 
 Built on [pypi-package-stats](https://github.com/ysskrishna/pypi-package-stats) — a Python library for fetching PyPI package statistics.
+
+## Built and maintained by
+
+PyPI Package Stats Action is built and maintained by:
+
+| | Name | GitHub | Role |
+|---|------|--------|------|
+| <img src="https://github.com/ysskrishna.png?size=120" width="60" height="60" alt="Y. Siva Sai Krishna"> | **Y. Siva Sai Krishna** | [@ysskrishna](https://github.com/ysskrishna) | Creator |
+
+## Changelog
+
+See [CHANGELOG](CHANGELOG.md) for release history.
+
+## Support
+
+If you find this project helpful:
+
+- ⭐ Star the repository
+- 🐛 [Report issues](https://github.com/ysskrishna/pypi-package-stats-action/issues)
+- 🔀 Submit pull requests
+- 💝 [Sponsor on GitHub](https://github.com/sponsors/ysskrishna)
+
+## License
+
+MIT © [Y. Siva Sai Krishna](https://github.com/ysskrishna) — see [LICENSE](LICENSE) for details.
 
 ---
 
 <p align="left">
   <a href="https://github.com/ysskrishna">Author's GitHub</a> •
   <a href="https://linkedin.com/in/ysskrishna">Author's LinkedIn</a> •
+  <a href="https://ysskrishna.space">Author's site</a> •
+  <a href="https://github.com/marketplace/actions/pypi-package-stats">GitHub Marketplace</a> •
   <a href="https://github.com/ysskrishna/pypi-package-stats">pypi-package-stats Library</a> •
   <a href="https://github.com/ysskrishna/pypi-package-stats-action-examples">Examples</a> •
-  <a href="https://github.com/ysskrishna/pypi-package-stats-action/issues">Report Issues</a> •
-  <a href="https://github.com/ysskrishna/pypi-package-stats-action/releases">Releases</a>
+  <a href="https://github.com/ysskrishna/pypi-package-stats-action/releases">Releases</a> •
+  <a href="https://github.com/ysskrishna/pypi-package-stats-action/issues">Report Issues</a>
 </p>
