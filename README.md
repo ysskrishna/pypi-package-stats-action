@@ -3,6 +3,8 @@
 [![CI](https://github.com/ysskrishna/pypi-package-stats-action/actions/workflows/test.yml/badge.svg)](https://github.com/ysskrishna/pypi-package-stats-action/actions/workflows/test.yml)
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-PyPI%20Package%20Stats-blue?logo=github)](https://github.com/marketplace/actions/pypi-package-stats)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Context7](https://img.shields.io/badge/Context7-docs-18181B)](https://context7.com/ysskrishna/pypi-package-stats-action)
+[![Ask DeepWiki](https://img.shields.io/badge/DeepWiki-ask-18181B)](https://deepwiki.com/ysskrishna/pypi-package-stats-action)
 
 A GitHub Action to fetch PyPI package download statistics and metadata. Powered by [pypi-package-stats](https://github.com/ysskrishna/pypi-package-stats).
 
