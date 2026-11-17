@@ -1,0 +1,28 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/ysskrishna/pypi-package-stats-action",
+  "public_key": "pk_VesXVq9WjBT8ecKU9XIZz",
+  "projectTitle": "PyPI Package Stats Action",
+  "description": "GitHub Action that fetches PyPI package download statistics and metadata with pypi-package-stats and exposes them as step outputs and JSON.",
+  "excludeFolders": [
+    "archive",
+    "archived",
+    "old",
+    "deprecated",
+    "legacy",
+    "tests",
+    ".github",
+    "scripts"
+  ],
+  "excludeFiles": [
+    "CHANGELOG.md",
+    "changelog.md",
+    "LICENSE.md",
+    "license.md",
+    "CODE_OF_CONDUCT.md",
+    "NEWS.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "AGENTS.md"
+  ]
+}
